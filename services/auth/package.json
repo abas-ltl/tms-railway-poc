@@ -1,0 +1,28 @@
+{
+  "name": "@tms/auth",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Servicio de identidad: registra usuarios, emite JWT y publica el JWKS. Solo red privada.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js",
+    "migrate": "dbmate --migrations-dir db/migrations --migrations-table auth_schema_migrations --no-dump-schema --wait up"
+  },
+  "dependencies": {
+    "@nestjs/common": "^12.0.1",
+    "@nestjs/core": "^12.0.1",
+    "@nestjs/platform-express": "^12.0.1",
+    "dbmate": "^2.38.1",
+    "jose": "^6.2.17",
+    "pg": "^8.23.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.11.0",
+    "typescript": "^6.0.2"
+  }
+}

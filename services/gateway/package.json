@@ -1,0 +1,27 @@
+{
+  "name": "@tms/gateway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Puerta pública del sistema: CORS, límite de peticiones, verificación de JWT y proxy a los servicios internos.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "^12.0.1",
+    "@nestjs/core": "^12.0.1",
+    "@nestjs/platform-express": "^12.0.1",
+    "@tms/auth-jwt": "*",
+    "express-rate-limit": "^8.7.4",
+    "helmet": "^8.3.0",
+    "http-proxy-middleware": "^4.2.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^6.0.2"
+  }
+}

@@ -1,0 +1,9 @@
+# Lo que NO se manda al build de Docker (ni a Railway con `railway up`).
+node_modules
+**/node_modules
+**/dist
+*.tsbuildinfo
+.env
+.git
+docs
+.railway

@@ -1,0 +1,86 @@
+# Réplica local de lo que tendrás en Railway. Uso:
+#   node scripts/generate-jwk.mjs        (una vez: crea .env con la clave del JWT)
+#   docker compose up --build
+#   node scripts/smoke-test.mjs
+#
+# Cómo se corresponde con Railway:
+#   - Cada bloque de "services" = un servicio de Railway, con la MISMA imagen (mismo Dockerfile).
+#   - docker compose crea una red privada donde cada servicio se llama por su nombre
+#     (http://auth:3001). En Railway es lo mismo con otro dominio: http://auth.railway.internal:3001.
+#   - Solo el gateway publica un puerto hacia tu PC (8080). auth y orders NO: desde tu navegador
+#     no puedes llegar a ellos, igual que en Railway no tendrán dominio público.
+#   - Los servicios *-migrate imitan el "pre-deploy command": corren las migraciones y terminan;
+#     si fallan, el servicio no arranca.
+name: tms-poc
+
+x-database-url: &database-url postgres://postgres:postgres@postgres:5432/tms?sslmode=disable
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tms
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d tms"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  auth-migrate:
+    image: tms-poc/auth
+    build: { context: ., dockerfile: services/auth/Dockerfile }
+    command: ["npm", "run", "migrate"]
+    environment:
+      DATABASE_URL: *database-url
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  auth:
+    image: tms-poc/auth
+    build: { context: ., dockerfile: services/auth/Dockerfile }
+    environment:
+      PORT: 3001
+      DATABASE_URL: *database-url
+      # Sale del .env que genera scripts/generate-jwk.mjs. Si falta, compose se niega a arrancar.
+      JWT_PRIVATE_JWK: ${JWT_PRIVATE_JWK:?Falta JWT_PRIVATE_JWK. Ejecuta primero node scripts/generate-jwk.mjs}
+    depends_on:
+      auth-migrate: { condition: service_completed_successfully }
+
+  orders-migrate:
+    image: tms-poc/orders
+    build: { context: ., dockerfile: services/orders/Dockerfile }
+    command: ["npm", "run", "migrate"]
+    environment:
+      DATABASE_URL: *database-url
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  orders:
+    image: tms-poc/orders
+    build: { context: ., dockerfile: services/orders/Dockerfile }
+    environment:
+      PORT: 3002
+      DATABASE_URL: *database-url
+      AUTH_JWKS_URL: http://auth:3001/.well-known/jwks.json
+    depends_on:
+      orders-migrate: { condition: service_completed_successfully }
+
+  gateway:
+    image: tms-poc/gateway
+    build: { context: ., dockerfile: services/gateway/Dockerfile }
+    environment:
+      PORT: 8080
+      AUTH_URL: http://auth:3001
+      ORDERS_URL: http://orders:3002
+      CORS_ORIGINS: http://localhost:5173
+      # En tu PC no hay ningún proxy delante del gateway (en Railway sí: su borde).
+      TRUST_PROXY: 0
+    ports:
+      - "8080:8080"
+    depends_on: [auth, orders]
+
+volumes:
+  pgdata:

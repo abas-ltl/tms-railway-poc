@@ -1,0 +1,5 @@
+node_modules/
+dist/
+*.tsbuildinfo
+# El .env lleva la clave privada del JWT: nunca se sube al repo.
+.env

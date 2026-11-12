@@ -1,0 +1,22 @@
+{
+  // Configuración de TypeScript compartida por todo el monorepo.
+  // Cada paquete la extiende y solo cambia rootDir/outDir.
+  "compilerOptions": {
+    // NestJS 12 usa ES Modules: los imports llevan extensión .js
+    // aunque el archivo fuente sea .ts (es la ruta que existirá tras compilar).
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "ES2023",
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "declaration": true,
+    // Nest necesita estas dos para que funcione la inyección de dependencias por decoradores.
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "types": ["node"]
+  }
+}

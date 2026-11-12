@@ -1,0 +1,24 @@
+{
+  "name": "tms-railway-poc",
+  "private": true,
+  "description": "Prueba de concepto: gateway + auth + orders como servicios separados, listos para Railway.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "packages/auth-jwt",
+    "services/auth",
+    "services/orders",
+    "services/gateway"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "keys": "node scripts/generate-jwk.mjs",
+    "infra:plan": "node scripts/railway-iac.mjs plan",
+    "infra:apply": "node scripts/railway-iac.mjs apply"
+  },
+  "devDependencies": {
+    "railway": "^3.16.0"
+  }
+}
